@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+para-cli
 
 # Test binary, built with `go test -c`
 *.test
