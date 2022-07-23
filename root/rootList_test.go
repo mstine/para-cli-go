@@ -54,3 +54,51 @@ func TestAdd(t *testing.T) {
 		})
 	}
 }
+
+func TestRemove(t *testing.T) {
+	testCases := []struct {
+		name      string
+		rootName  string
+		expectLen int
+		expectErr error
+	}{
+		{"RemoveExisting", "root1", 1, nil},
+		{"RemoveNotFound", "root3", 1, root.ErrNotExists},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			prl := &root.ParaRootList{
+				Roots: []root.ParaRoot{
+					{
+						Name: "root1",
+						Path: "path1",
+					},
+					{
+						Name: "root2",
+						Path: "path2",
+					},
+				},
+			}
+			err := prl.Remove(tc.rootName)
+			if tc.expectErr != nil {
+				if err == nil {
+					t.Fatalf("Expected error, got nil instead\n")
+				}
+				if !errors.Is(err, tc.expectErr) {
+					t.Errorf("Expected error %q, got %q instead\n",
+						tc.expectErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Expected no error, got %q instead\n", err)
+			}
+			if len(prl.Roots) != tc.expectLen {
+				t.Errorf("Expected list length %d, got %d instead\n", tc.expectLen, len(prl.Roots))
+			}
+			if prl.Roots[0].Name == tc.rootName {
+				t.Errorf("PARA Root name %q should not be in the list\n", tc.rootName)
+			}
+		})
+	}
+}
