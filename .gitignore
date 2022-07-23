@@ -4,7 +4,10 @@
 *.dll
 *.so
 *.dylib
+
+# *nix Binaries
 para-cli
+para
 
 # Test binary, built with `go test -c`
 *.test
