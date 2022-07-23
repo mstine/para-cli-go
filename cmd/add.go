@@ -58,7 +58,7 @@ func addAction(out io.Writer, prl *root.ParaRootList, args []string) error {
 	if err := prl.Add(root); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "Added PARA Root: ", root)
+	fmt.Fprintln(out, "Added PARA Root:", root)
 	return nil
 }
 

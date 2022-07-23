@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"testing"
 
@@ -44,7 +45,7 @@ func TestHostActions(t *testing.T) {
 		{
 			name:           "AddAction",
 			args:           []string{"root1", "path1"},
-			expectedOut:    "Added PARA Root:  {root1 path1}\n",
+			expectedOut:    "Added PARA Root: {root1 path1}\n",
 			initList:       false,
 			actionFunction: addAction,
 		},
@@ -57,7 +58,7 @@ func TestHostActions(t *testing.T) {
 		{
 			name:           "RemoveAction",
 			args:           []string{"root1"},
-			expectedOut:    "Removed PARA Root:  root1\n",
+			expectedOut:    "Removed PARA Root: root1\n",
 			initList:       true,
 			actionFunction: removeAction,
 		},
@@ -76,5 +77,64 @@ func TestHostActions(t *testing.T) {
 				t.Errorf("Expected output %q, got %q\n", tc.expectedOut, out.String())
 			}
 		})
+	}
+}
+
+func TestIntegration(t *testing.T) {
+	var out bytes.Buffer
+
+	initial := setUp(true)
+
+	delRoot := "root2"
+
+	final := root.ParaRootList{
+		Roots: []root.ParaRoot{
+			{
+				Name: "root1",
+				Path: "path1",
+			},
+			{
+				Name: "root3",
+				Path: "path3",
+			},
+		},
+	}
+
+	expectedOut := ""
+	for _, v := range initial.Roots {
+		expectedOut += fmt.Sprintf("Added PARA Root: %s\n", v)
+	}
+	for _, v := range initial.Roots {
+		expectedOut += fmt.Sprintf("%s\n", v)
+	}
+	expectedOut += fmt.Sprintf("Removed PARA Root: %s\n", delRoot)
+	for _, v := range final.Roots {
+		expectedOut += fmt.Sprintf("%s\n", v)
+	}
+
+	roots := root.ParaRootList{
+		Roots: []root.ParaRoot{},
+	}
+
+	for _, v := range initial.Roots {
+		if err := addAction(&out, &roots, []string{v.Name, v.Path}); err != nil {
+			t.Fatalf("Expected no error, got %q\n", err)
+		}
+	}
+
+	if err := listAction(&out, &roots, nil); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	if err := removeAction(&out, &roots, []string{delRoot}); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	if err := listAction(&out, &roots, nil); err != nil {
+		t.Fatalf("Expected no error, got %q\n", err)
+	}
+
+	if out.String() != expectedOut {
+		t.Errorf("Expected output %q, got %q\n", expectedOut, out.String())
 	}
 }

@@ -56,7 +56,7 @@ func removeAction(out io.Writer, prl *root.ParaRootList, args []string) error {
 	if err := prl.Remove(root); err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "Removed PARA Root: ", root)
+	fmt.Fprintln(out, "Removed PARA Root:", root)
 	return nil
 }
 
