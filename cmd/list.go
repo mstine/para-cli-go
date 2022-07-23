@@ -40,11 +40,11 @@ var listCmd = &cobra.Command{
 		if err := viper.Unmarshal(&prl); err != nil {
 			return err
 		}
-		return listAction(os.Stdout, prl, args)
+		return listAction(os.Stdout, &prl, args)
 	},
 }
 
-func listAction(out io.Writer, prl root.ParaRootList, args []string) error {
+func listAction(out io.Writer, prl *root.ParaRootList, args []string) error {
 	for _, r := range prl.Roots {
 		if _, err := fmt.Fprintln(out, r); err != nil {
 			return err
