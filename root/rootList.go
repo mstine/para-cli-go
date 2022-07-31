@@ -24,13 +24,15 @@ package root
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"golang.org/x/exp/slices"
 )
 
 var (
-	ErrExists    = errors.New("PARA Root already exists")
-	ErrNotExists = errors.New("PARA Root does not exist")
+	ErrExists           = errors.New("PARA Root already exists")
+	ErrNotExists        = errors.New("PARA Root does not exist")
+	ErrPathNotDirectory = errors.New("path specified for PARA Root is not a directory")
 )
 
 type ParaRoot struct {
@@ -48,6 +50,20 @@ func (list *ParaRootList) Add(root ParaRoot) error {
 	})
 	if i > -1 {
 		return fmt.Errorf("%w: %s", ErrExists, root)
+	}
+	if fi, err := os.Stat(root.Path); err != nil {
+		if !os.IsNotExist(err) {
+			// If os.Stat returns any other error than "does not exist," propagate the error
+			return fmt.Errorf("%w: %s", err, root)
+		} else {
+			// If os.Stat returns "does not exist" error, make the directory path
+			os.Mkdir(root.Path, 0755)
+		}
+	} else {
+		// We can assume path exists - make sure it's a directory
+		if !fi.IsDir() {
+			return fmt.Errorf("%w: %s", ErrPathNotDirectory, root)
+		}
 	}
 	list.Roots = append(list.Roots, root)
 	return nil
